@@ -46,13 +46,13 @@ RecentProvider recentProvider = RecentProvider();
 BookmarkProvider bookmarkProvider = BookmarkProvider();
 AppDependencyProvider appDependencyProvider = AppDependencyProvider();
 // WellnessProvider moved to local to avoid top-level Firebase access.
-bool _firebaseReady = false;
+bool firebaseReady = false;
 Future<void> _initFirebase() async {
   try {
     // Timeout after 5 seconds — if Firebase hangs (no network/play services),
     // don't block app startup.
     await Firebase.initializeApp().timeout(const Duration(seconds: 5));
-    _firebaseReady = true;
+    firebaseReady = true;
   } catch (e) {
     // Try with dummy options so FirebaseAuth.instance etc. don't throw
     // during widget creation. The app won't use Firebase features.
@@ -102,13 +102,13 @@ Future<DevicePresentation> appInitialize({
   // Guarded: Crashlytics is only available if Firebase initialized successfully.
   FlutterError.onError = (details) {
     if (_isRecoverableImageError(details)) return;
-    if (!_firebaseReady) return;
+    if (!firebaseReady) return;
     try {
       FirebaseCrashlytics.instance.recordFlutterFatalError(details);
     } catch (_) {}
   };
   PlatformDispatcher.instance.onError = (error, stackTrace) {
-    if (_firebaseReady) {
+    if (firebaseReady) {
       try {
         FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
       } catch (_) {}
@@ -150,70 +150,45 @@ Future<DevicePresentation> appInitialize({
     await clearVideoPlaybackCache().timeout(const Duration(seconds: 10));
   } catch (_) {}
   // Guarded: requires Firebase to be initialized.
-  if (_firebaseReady) {
+  if (firebaseReady) {
     try {
       FirebaseMessaging.onBackgroundMessage(_messageHandler);
     } catch (_) {}
   }
   // Timeout: don't let downloader init hang startup.
   try {
-    await FlutterDownloader.initialize(debug: true, ignoreSsl: true)
+    await FlutterDownloader.initialize(debug: true)
         .timeout(const Duration(seconds: 10));
   } catch (_) {}
 
-  await settingsProvider.getCurrentThemeMode();
-  await settingsProvider.getCurrentMaterial3Mode();
+  await settingsProvider.hydrateAll();
+  
   // Timeout: Mixpanel init does network I/O, don't hang startup.
   try {
     await settingsProvider.initMixpanel().timeout(const Duration(seconds: 10));
   } catch (_) {}
-  await settingsProvider.getCurrentAdultMode();
-  await settingsProvider.getCurrentDefaultScreen();
-  await settingsProvider.getCurrentImageQuality();
-  await settingsProvider.getCurrentWatchCountry();
-  await settingsProvider.getSeekDuration();
-  await settingsProvider.getMaxBufferDuration();
-  await settingsProvider.getVideoResolution();
-  await settingsProvider.getSubtitleLanguage();
-  await settingsProvider.getSubtitleMode();
-  await settingsProvider.getViewMode();
-  await settingsProvider.getSubtitleSize();
-  await settingsProvider.getForegroundSubtitleColor();
-  await settingsProvider.getBackgroundSubtitleColor();
-  await settingsProvider.getAppLanguage();
-  await settingsProvider.getAppColorIndex();
-  await settingsProvider.getCustomAppColor();
-  await settingsProvider.getStreamProviderOrder();
-  await settingsProvider.getPlayerTimeStyle();
-  await settingsProvider.getUseProxyMode();
-  await settingsProvider.getSubtitleStyle();
-  await settingsProvider.getEnableNextEpisodeButton();
-  await settingsProvider.getIntroDbSettings();
-  await settingsProvider.getPlayerAmbientGlowEnabled();
-  await settingsProvider.getAutoLoadSources();
+  
   settingsProvider.completeHydration();
-  try {
-    await recentProvider.fetchMovies().timeout(const Duration(seconds: 10));
-  } catch (_) {}
-  try {
-    await recentProvider.fetchEpisodes().timeout(const Duration(seconds: 10));
-  } catch (_) {}
-  try {
-    await bookmarkProvider.fetchBookmarks().timeout(const Duration(seconds: 10));
-  } catch (_) {}
-  try {
-    final wp = WellnessProvider.instance;
-    await wp.initialize().timeout(const Duration(seconds: 15));
-  } catch (_) {}
-  await appDependencyProvider.getFlixQuestLogo();
-  await appDependencyProvider.getOccasionalTheme();
-  await appDependencyProvider.getAmbientMode();
-  await appDependencyProvider.getFQUrl();
-  await appDependencyProvider.getTmdbProxy();
-  await appDependencyProvider.getUpdateConfiguration();
+  
+  await Future.wait([
+    recentProvider.fetchMovies().timeout(const Duration(seconds: 10)).catchError((_) => []),
+    recentProvider.fetchEpisodes().timeout(const Duration(seconds: 10)).catchError((_) => []),
+    bookmarkProvider.fetchBookmarks().timeout(const Duration(seconds: 10)).catchError((_) {}),
+    appDependencyProvider.getFlixQuestLogo(),
+    appDependencyProvider.getOccasionalTheme(),
+    appDependencyProvider.getAmbientMode(),
+    appDependencyProvider.getFQUrl(),
+    appDependencyProvider.getTmdbProxy(),
+    appDependencyProvider.getUpdateConfiguration(),
+    () async {
+      try {
+        await WellnessProvider.instance.initialize().timeout(const Duration(seconds: 15));
+      } catch (_) {}
+    }(),
+  ]);
 
   // Sync services require Firebase. Skip if not available.
-  if (_firebaseReady) {
+  if (firebaseReady) {
     try {
       await BookmarkSyncService.instance.init().timeout(const Duration(seconds: 10));
     } catch (_) {}
@@ -233,20 +208,6 @@ void main() async {
       return DevicePresentation.handheld;
     },
   );
-  HttpOverrides.global = MyHttpOverrides();
-  HomeWidgetNavigationService.configure(
-    source: () => (
-      language: settingsProvider.appLanguage,
-      useProxy: settingsProvider.enableProxy,
-      proxy: appDependencyProvider.tmdbProxy,
-    ),
-  );
-  try {
-    await MediaLinkNavigationService.initialize().timeout(
-      const Duration(seconds: 10),
-    );
-  } catch (_) {}
-  HttpOverrides.global = MyHttpOverrides();
   HomeWidgetNavigationService.configure(
     source: () => (
       language: settingsProvider.appLanguage,

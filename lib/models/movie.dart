@@ -1,4 +1,5 @@
 import 'genre_ids.dart';
+import 'genres.dart';
 
 class MovieList {
   int? page;
@@ -195,7 +196,8 @@ class MovieDetails {
   List<ProductionCompanies>? productionCompanies;
   List<ProductionCountries>? productionCountries;
   List<SpokenLanguages>? spokenLanguages;
-  // BelongsToCollection? belongsToCollection;
+  List<Genres>? genres;
+  BelongsToCollection? belongsToCollection;
 
   MovieDetails({
     this.runtime,
@@ -210,7 +212,8 @@ class MovieDetails {
     this.productionCountries,
     this.spokenLanguages,
     this.imdbId,
-    /*this.belongsToCollection*/
+    this.genres,
+    this.belongsToCollection
   });
   MovieDetails.fromJson(Map<String, dynamic> json) {
     runtime = json['runtime'];
@@ -221,7 +224,15 @@ class MovieDetails {
     imdbId = json['imdb_id'];
     isAdult = json['adult'];
     id = json['id'];
-    // belongsToCollection = json['belongs_to_collection'];
+    if (json['belongs_to_collection'] != null) {
+      belongsToCollection = BelongsToCollection.fromJson(json['belongs_to_collection']);
+    }
+    if (json['genres'] != null) {
+      genres = [];
+      json['genres'].forEach((v) {
+        genres?.add(Genres.fromJson(v));
+      });
+    }
     originalTitle = json['original_title'];
     if (json['production_companies'] != null) {
       productionCompanies = [];

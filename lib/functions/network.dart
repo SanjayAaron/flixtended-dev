@@ -41,10 +41,10 @@ Future<List<Movie>> fetchMovies(
       );
     }
     final res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    final decoded = jsonDecode(res.body);
+    final decoded = await compute(jsonDecode, res.body);
     if (debugLabel != null) {
       final decodedMap = decoded is Map<String, dynamic> ? decoded : null;
       debugPrint(
@@ -81,7 +81,7 @@ Future<List<Movie>> fetchMovies(
     }
     rethrow;
   } finally {
-    client.close();
+    
   }
 
   return movieList.movies ?? [];
@@ -95,13 +95,13 @@ Future<List<Movie>> fetchCollectionMovies(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     collectionMovieList = CollectionMovieList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return collectionMovieList.movies ?? [];
 }
@@ -114,13 +114,13 @@ Future<CollectionDetails> fetchCollectionDetails(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     collectionDetails = CollectionDetails.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return collectionDetails;
 }
@@ -133,13 +133,13 @@ Future<List<Movie>> fetchPersonMovies(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     personMoviesList = PersonMoviesList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return personMoviesList.movies ?? [];
 }
@@ -152,13 +152,13 @@ Future<Images> fetchImages(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     images = Images.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return images;
 }
@@ -171,13 +171,13 @@ Future<PersonImages> fetchPersonImages(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     personImages = PersonImages.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return personImages;
 }
@@ -190,13 +190,13 @@ Future<Videos> fetchVideos(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     videos = Videos.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return videos;
 }
@@ -209,13 +209,13 @@ Future<Credits> fetchCredits(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     credits = Credits.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return credits;
 }
@@ -228,13 +228,13 @@ Future<List<Person>> fetchPerson(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     credits = PersonList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return credits.person ?? [];
 }
@@ -247,13 +247,13 @@ Future<List<Genres>> fetchGenre(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     newGenreList = GenreList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return newGenreList.genre ?? [];
 }
@@ -266,13 +266,13 @@ Future<ExternalLinks> fetchSocialLinks(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     externalLinks = ExternalLinks.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return externalLinks;
 }
@@ -285,13 +285,13 @@ Future fetchBelongsToCollection(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     belongsToCollection = BelongsToCollection.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return belongsToCollection;
 }
@@ -304,21 +304,21 @@ Future<MovieDetails> fetchMovieDetails(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     movieDetails = MovieDetails.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return movieDetails;
 }
 
 // Future<Credits> fetchPerson(String api) async {
 //   Credits credits;
-//   var res = await http.get(Uri.parse(api));
-//   var decodeRes = jsonDecode(res.body);
+//   var res = await httpClient.get(Uri.parse(api));
+//   var decodeRes = await compute(jsonDecode, res.body);
 //   credits = Credits.fromJson(decodeRes);
 //   return credits;
 // }
@@ -331,13 +331,13 @@ Future<PersonDetails> fetchPersonDetails(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     personDetails = PersonDetails.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return personDetails;
 }
@@ -350,13 +350,13 @@ Future<WatchProviders> fetchWatchProviders(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     watchProviders = WatchProviders.fromJson(decodeRes, country);
   } finally {
-    client.close();
+    
   }
   return watchProviders;
 }
@@ -369,13 +369,13 @@ Future<List<TV>> fetchTV(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     tvList = TVList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return tvList.tvSeries ?? [];
 }
@@ -388,13 +388,13 @@ Future<TVDetails> fetchTVDetails(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     tvDetails = TVDetails.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return tvDetails;
 }
@@ -407,13 +407,13 @@ Future<List<TV>> fetchPersonTV(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      (() => http.get(Uri.parse(api)).timeout(timeOut)),
+      (() => httpClient.get(Uri.parse(api)).timeout(timeOut)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     personTVList = PersonTVList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return personTVList.tv ?? [];
 }
@@ -425,13 +425,13 @@ Future<Movie> getMovie(String api, bool isProxyEnabled, String proxyUrl) async {
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     movie = Movie.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return movie;
 }
@@ -443,13 +443,13 @@ Future<TV> getTV(String api, bool isProxyEnabled, String proxyUrl) async {
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     tv = TV.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return tv;
 }
@@ -463,13 +463,13 @@ Future<EpisodeList> getEpisode(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     episode = EpisodeList.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return episode;
 }
@@ -483,16 +483,16 @@ Future<ExternalIdLookup> findByExternalId(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     if (decodeRes is! Map<String, dynamic>) {
       throw const FormatException('Expected a JSON object from the find API');
     }
     lookup = ExternalIdLookup.fromJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return lookup;
 }
@@ -506,16 +506,16 @@ Future<BelongsToCollection> fetchCollectionSummary(
       api = '$proxyUrl?destination=$api';
     }
     var res = await retryOptions.retry(
-      () => http.get(Uri.parse(api)).timeout(timeOut),
+      () => httpClient.get(Uri.parse(api)).timeout(timeOut),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    var decodeRes = jsonDecode(res.body);
+    var decodeRes = await compute(jsonDecode, res.body);
     if (decodeRes is! Map<String, dynamic>) {
       throw const FormatException('Expected a JSON object from collection API');
     }
     collection = BelongsToCollection.fromCollectionJson(decodeRes);
   } finally {
-    client.close();
+    
   }
   return collection;
 }
@@ -523,7 +523,7 @@ Future<BelongsToCollection> fetchCollectionSummary(
 Future<String> getVttFileAsString(String url) async {
   try {
     var response = await retryOptions.retry(
-      () => http.get(Uri.parse(url)).timeout(const Duration(seconds: 15)),
+      () => httpClient.get(Uri.parse(url)).timeout(const Duration(seconds: 15)),
       retryIf: (e) => e is SocketException,
     );
     if (response.statusCode == 200) {
@@ -558,7 +558,7 @@ Future<String> getVixSrcEmbedSrc(String api) async {
           .timeout(timeOutStream)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
-    final decodeRes = jsonDecode(res.body);
+    final decodeRes = await compute(jsonDecode, res.body);
 
     if (res.statusCode != 200 ||
         decodeRes is! Map<String, dynamic> ||

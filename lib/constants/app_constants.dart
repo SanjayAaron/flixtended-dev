@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:retry/retry.dart';
 import 'dart:io';
@@ -47,11 +49,12 @@ const kTableLeftStyle =
 /// [PackageInfo] directly when it needs a guaranteed value.
 String currentAppVersion = '';
 
-final client = HttpClient();
+
+final httpClient = http.Client();
 const retryOptions = RetryOptions(
-    maxDelay: Duration(milliseconds: 300),
-    delayFactor: Duration(seconds: 0),
-    maxAttempts: 100000);
+    maxDelay: Duration(seconds: 10),
+    delayFactor: Duration(milliseconds: 500),
+    maxAttempts: 3);
 const timeOut = Duration(seconds: 60);
 
 const retryOptionsStream = RetryOptions(
@@ -94,14 +97,7 @@ CacheManager cacheProp() => _sharedImageCache;
 
 enum MediaType { movie, tvShow }
 
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
-}
+
 
 late SharedPreferences sharedPrefsSingleton;
 

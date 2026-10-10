@@ -31,9 +31,14 @@ class AnalyticsService {
   static Future<AnalyticsService> init() async {
     if (_instance != null && _instance!.isInitialized) return _instance!;
     _instance = AnalyticsService._();
+    final key = mixpanelKey;
+    if (key == null || key.isEmpty) {
+      debugPrint('[AnalyticsService] Mixpanel key is missing, skipping init.');
+      return _instance!;
+    }
     try {
       _instance!._mixpanel = await Mixpanel.init(
-        mixpanelKey,
+        key,
         optOutTrackingDefault: false,
         trackAutomaticEvents: true,
       );

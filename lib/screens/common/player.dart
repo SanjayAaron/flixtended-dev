@@ -286,6 +286,7 @@ class _PlayerOneState extends State<PlayerOne> with WidgetsBindingObserver {
       'recommendationsButton=$hasMovieRecommendations',
     );
     betterPlayerControlsConfiguration = BetterPlayerControlsConfiguration(
+        enableThumbnailPreview: !widget.useTvControls,
         // Gesture controls configuration
         gestureConfiguration: BetterPlayerGestureConfiguration(
           enableVolumeSwipe: !widget.useTvControls,

@@ -112,6 +112,71 @@ class SettingsProvider with ChangeNotifier {
   bool _autoLoadSources = true;
   bool get autoLoadSources => _autoLoadSources;
 
+  Future<void> hydrateAll() async {
+    final futures = await Future.wait([
+      _settingsPreferences.getThemeMode(),
+      _settingsPreferences.getMaterial3Mode(),
+      _settingsPreferences.getAdultMode(),
+      _settingsPreferences.getDefaultHome(),
+      _settingsPreferences.getImageQuality(),
+      _settingsPreferences.getCountryName(),
+      _settingsPreferences.getSeekDuraion(),
+      _settingsPreferences.getMaxBuffer(),
+      _settingsPreferences.getDefaultVideoQuality(),
+      _settingsPreferences.getSubLanguage(),
+      _settingsPreferences.getSubtitleMode(),
+      _settingsPreferences.autoFullScreen(),
+      _settingsPreferences.subtitleFont(),
+      _settingsPreferences.subtitleForeground(),
+      _settingsPreferences.subtitleBackground(),
+      _settingsPreferences.getAppLang(),
+      _settingsPreferences.getAppColorIndex(),
+      _settingsPreferences.getAppCustomColor(),
+      _settingsPreferences.getStreamProviderOrder(),
+      _settingsPreferences.getPlayerStyleIndex(),
+      _settingsPreferences.getUseProxy(),
+      _settingsPreferences.getSubtitleStyle(),
+      _settingsPreferences.getEnableNextEpisodeButton(),
+      _settingsPreferences.getEnableIntroDbSkipButtons(),
+      _settingsPreferences.getPlayerAmbientGlowEnabled(),
+      _settingsPreferences.getAutoLoadSources(),
+    ]);
+
+    _appTheme = futures[0] as String;
+    _isMaterial3Enabled = futures[1] as bool;
+    _isAdult = futures[2] as bool;
+    _defaultHome = futures[3] as DefaultHome;
+    _imageQuality = futures[4] as String;
+    _defaultCountry = futures[5] as String;
+    _defaultSeekDuration = futures[6] as int;
+    _defaultMaxBufferDuration = (futures[7] as int).clamp(15000, 180000);
+    _defaultVideoResolution = futures[8] as int;
+    _defaultSubtitleLanguage = futures[9] as String;
+    _fetchSpecificLangSubs = futures[10] as bool;
+    _defaultViewMode = futures[11] as bool;
+    _subtitleFontSize = normalizeSubtitleFontSize(futures[12] as int);
+    _subtitleForegroundColor = serializeSubtitleColor(parseStoredSubtitleColor(futures[13] as String, fallback: Colors.white));
+    _subtitleBackgroundColor = serializeSubtitleColor(parseStoredSubtitleColor(futures[14] as String, fallback: Colors.black45));
+    _appLanguage = futures[15] as String;
+    _appColorIndex = futures[16] as int;
+    
+    final customColor = futures[17] as int?;
+    if (customColor != null) {
+      _customAppColor = customColor;
+    }
+    
+    _streamProviderOrder = futures[18] as List<String>;
+    _playerTimeDisplay = futures[19] as int;
+    _enableProxy = futures[20] as bool;
+    _subtitleTextStyle = normalizeSubtitleTextStyle(futures[21] as String);
+    _enableNextEpisodeButton = futures[22] as bool;
+    _enableIntroDbSkipButtons = futures[23] as bool;
+    _playerAmbientGlowEnabled = futures[24] as bool;
+    _autoLoadSources = futures[25] as bool;
+
+    notifyListeners();
+  }
+
   // theme change
   Future<void> getCurrentThemeMode() async {
     appTheme = await _settingsPreferences.getThemeMode();

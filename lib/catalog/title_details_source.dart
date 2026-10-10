@@ -32,7 +32,7 @@ abstract class TitleDetailsSource {
 
 /// TMDB through the app's fetchers, language, proxy and adult setting.
 class TmdbTitleDetailsSource implements TitleDetailsSource {
-  const TmdbTitleDetailsSource({
+  TmdbTitleDetailsSource({
     required this.settings,
     required this.dependencies,
   });
@@ -50,23 +50,37 @@ class TmdbTitleDetailsSource implements TitleDetailsSource {
       ? Endpoints.movieDetailsUrl(item.id, _language)
       : Endpoints.tvDetailsUrl(item.id, _language);
 
-  @override
-  Future<MovieDetails> movie(int id) => fetchMovieDetails(
-        Endpoints.movieDetailsUrl(id, _language),
-        _proxied,
-        _proxy,
-      );
+  Future<MovieDetails>? _movieFuture;
+  Future<TVDetails>? _seriesFuture;
 
   @override
-  Future<TVDetails> series(int id) => fetchTVDetails(
-        Endpoints.tvDetailsUrl(id, _language),
-        _proxied,
-        _proxy,
-      );
+  Future<MovieDetails> movie(int id) {
+    return _movieFuture ??= fetchMovieDetails(
+      Endpoints.movieDetailsUrl(id, _language),
+      _proxied,
+      _proxy,
+    );
+  }
 
   @override
-  Future<List<Genres>> genres(MediaItem item) =>
-      fetchGenre(_detailsUrl(item), _proxied, _proxy);
+  Future<TVDetails> series(int id) {
+    return _seriesFuture ??= fetchTVDetails(
+      Endpoints.tvDetailsUrl(id, _language),
+      _proxied,
+      _proxy,
+    );
+  }
+
+  @override
+  Future<List<Genres>> genres(MediaItem item) async {
+    if (_isMovie(item)) {
+      final m = await movie(item.id);
+      return m.genres ?? const <Genres>[];
+    } else {
+      final s = await series(item.id);
+      return s.genres ?? const <Genres>[];
+    }
+  }
 
   @override
   Future<Credits> credits(MediaItem item) => fetchCredits(
@@ -106,12 +120,8 @@ class TmdbTitleDetailsSource implements TitleDetailsSource {
 
   @override
   Future<BelongsToCollection?> collection(int movieId) async {
-    final value = await fetchBelongsToCollection(
-      Endpoints.movieDetailsUrl(movieId, _language),
-      _proxied,
-      _proxy,
-    ) as BelongsToCollection;
-    return value.id == null ? null : value;
+    final m = await movie(movieId);
+    return m.belongsToCollection;
   }
 
   @override
