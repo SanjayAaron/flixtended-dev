@@ -25,7 +25,28 @@ jobs:
         with:
           flutter-version: '3.35.7'
           channel: 'stable'
+
+      - name: Create .env file
+        working-directory: FlixQuest-India
+        run: |
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            echo "TMDB_API_KEY=dummy" > .env
+            echo "MIXPANEL_API_KEY=dummy" >> .env
+            echo "FLIXQUEST_API_URL=https://dummy.example.com" >> .env
+          fi
           
+          if [ -n "${{ secrets.TMDB_API_KEY }}" ]; then
+            sed -i "s|^TMDB_API_KEY=.*|TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}|" .env
+          fi
+          if [ -n "${{ secrets.MIXPANEL_API_KEY }}" ]; then
+            sed -i "s|^MIXPANEL_API_KEY=.*|MIXPANEL_API_KEY=${{ secrets.MIXPANEL_API_KEY }}|" .env
+          fi
+          if [ -n "${{ secrets.FLIXQUEST_API_URL }}" ]; then
+            sed -i "s|^FLIXQUEST_API_URL=.*|FLIXQUEST_API_URL=${{ secrets.FLIXQUEST_API_URL }}|" .env
+          fi
+
       - name: Install dependencies
         working-directory: FlixQuest-India
         run: flutter pub get
