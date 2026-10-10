@@ -47,6 +47,28 @@ jobs:
             sed -i "s|^FLIXQUEST_API_URL=.*|FLIXQUEST_API_URL=${{ secrets.FLIXQUEST_API_URL }}|" .env
           fi
 
+      - name: Setup Firebase Google Services
+        working-directory: FlixQuest-India
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "Decoding Google Services JSON from secrets..."
+            if echo "$GOOGLE_SERVICES_JSON" | base64 -d | jq e . >/dev/null 2>&1; then
+               echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
+            else
+               echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+            fi
+            
+            if ! jq e . android/app/google-services.json >/dev/null 2>&1; then
+              echo "Error: GOOGLE_SERVICES_JSON is not valid JSON."
+              exit 1
+            fi
+            echo "Successfully configured Google Services."
+          else
+            echo "GOOGLE_SERVICES_JSON secret not provided. Skipping Google Services setup. The app will use dummy runtime config."
+          fi
+
       - name: Install dependencies
         working-directory: FlixQuest-India
         run: flutter pub get
